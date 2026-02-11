@@ -78,34 +78,34 @@ namespace hTorrent
         /// Present ONLY for single-file torrents
         /// This field must NOT exist for mult-file torrents
         /// </summary>
-        internal long? Length { get; init; }
+        public long? Length { get; init; }
 
 
         /// <summary>
         /// All files that will be downloaded
         ///</summary>
-        internal List<File>? Files { get; init; }
+        public List<File>? Files { get; init; }
 
 
         /// <summary>
         /// Whether or not the torrent is private or not
         ///</summary>
 
-        internal long? Private { get; init; }
+        public long? Private { get; init; }
 
 
         /// <summary>
         /// Hold tracker identifier 
         ///</summary>
 
-        internal byte[]? Source { get; init; }
+        public byte[]? Source { get; init; }
 
 
 
         /// <summary>
         /// Extra fields not explicitly modeled
         ///</summary>
-        internal Dictionary<byte[], object>? ExtraFields { get; init; }
+        public Dictionary<byte[], object>? ExtraFields { get; init; }
 
 
 
@@ -116,14 +116,14 @@ namespace hTorrent
         /// Stored as bytes to preserve the original encoding exactly as it
         /// appears in the torrent file.
         /// </summary>
-        internal byte[] Name { get; init; } = Encoding.ASCII.GetBytes("N/A");
+        public byte[] Name { get; init; } = Encoding.ASCII.GetBytes("N/A");
 
         /// <summary>
         /// Length in bytes of each piece.
         ///
         /// All pieces except the final one are exactly this size.
         /// </summary>
-        internal long PieceLength { get; init; }
+        public long PieceLength { get; init; }
 
         /// <summary>
         /// Concatenated SHA-1 hashes of all pieces.
@@ -131,7 +131,7 @@ namespace hTorrent
         /// Each piece hash is exactly 20 bytes long and corresponds to a
         /// sequential piece of the torrent payload.
         /// </summary>
-        internal byte[]? Pieces { get; init; }
+        public byte[]? Pieces { get; init; }
 
         #endregion
 
@@ -144,7 +144,7 @@ namespace hTorrent
         /// the torrent's info-hash, which uniquely identifies the torrent
         /// across the BitTorrent network.
         /// </summary>
-        internal byte[]? RawBencodedInfo { get; init; }
+        public byte[]? RawBencodedInfo { get; init; }
 
         /// <summary>
         /// Optional MD5 checksum of the payload.
@@ -152,7 +152,7 @@ namespace hTorrent
         /// This field is non-standard and rarely used, but included here
         /// for completeness and compatibility with older torrents.
         /// </summary>
-        internal byte[]? Md5Sum { get; init; }
+        public byte[]? Md5Sum { get; init; }
 
         /// <summary>
         /// Optional SHA-1 hash for extended verification.
@@ -160,14 +160,14 @@ namespace hTorrent
         /// This is distinct from the per-piece SHA-1 hashes and may be
         /// used by certain clients or extensions.
         /// </summary>
-        internal byte[]? Sha1 { get; init; }
+        public byte[]? Sha1 { get; init; }
 
         /// <summary>
         /// Optional SHA-256 hash for BitTorrent v2 or hybrid torrents.
         ///
         /// Included for forward compatibility with newer specifications.
         /// </summary>
-        internal byte[]? Sha256 { get; init; }
+        public byte[]? Sha256 { get; init; }
 
         #endregion
 
@@ -178,13 +178,13 @@ namespace hTorrent
         ///
         /// Returns an empty string if the name is not present.
         /// </summary>
-        internal string NameString =>
+        public string NameString =>
             Name != null ? Encoding.UTF8.GetString(Name) : string.Empty;
 
         /// <summary>
         /// Returns a bool denoting whether a torrent is private
         /// </summary>
-        internal bool IsPrivate => (Private != null) && Private == 1;
+        public bool IsPrivate => (Private != null) && Private == 1;
 
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace hTorrent
         ///
         /// Returns an empty string if the name is not present.
         /// </summary>
-        internal string SourceString =>
+        public string SourceString =>
             Source != null ? Encoding.UTF8.GetString(Source) : string.Empty;
 
 
@@ -202,7 +202,7 @@ namespace hTorrent
         /// Calculated by dividing the total piece hash buffer length
         /// by the fixed SHA-1 hash size (20 bytes).
         /// </summary>
-        internal int PieceCount =>
+        public int PieceCount =>
             Pieces != null ? Pieces.Length / 20 : 0;
 
         /// <summary>
@@ -214,7 +214,7 @@ namespace hTorrent
         /// This abstraction simplifies piece verification logic while
         /// keeping the underlying storage format compact.
         /// </summary>
-        internal IEnumerable<byte[]> PieceHashes
+        public IEnumerable<byte[]> PieceHashes
         {
             get
             {

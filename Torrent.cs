@@ -42,13 +42,20 @@ namespace hTorrent
         /// Constructor - takes in a filename and executes full parsing process, will add a magnet link constructor in the future
         /// </summary>
 
-        public Torrent(string filename)
+
+        public Torrent() { }
+
+        public Torrent TorrentBuilder(string filename)
         {
+            //parse
             RawInfoBytesHolder rawBytes = new RawInfoBytesHolder();
             Parser.BNode node = Parser.Parse(System.IO.File.ReadAllBytes(filename));
             var root = (Dictionary<byte[], object>)Map(node, rawBytes);
-            MapToTorrent(root, rawBytes);
-            Validate();
+
+            //map and validate
+            Torrent tor = MapToTorrent(root, rawBytes);
+            Validate(tor);
+            return tor;
 
         }
 
@@ -57,7 +64,7 @@ namespace hTorrent
         /// Enum for version detection
         /// </summary>
 
-        internal enum Version
+        public enum Version
         {
             Unknown = 0, V1 = 1, V2 = 2, HYBRID = 3,
         }
@@ -146,7 +153,7 @@ namespace hTorrent
         ///
         /// Stored as raw UTF-8 bytes to preserve the original encoding.
         /// </summary>
-        internal byte[]? Announce { get; set; }
+        public byte[]? Announce { get; init; }
 
         /// <summary>
         /// Tiered tracker list (announce-list).
@@ -154,32 +161,32 @@ namespace hTorrent
         /// Each inner list represents a tracker tier; trackers within
         /// the same tier are considered equivalent.
         /// </summary>
-        internal List<List<byte[]>>? AnnounceList { get; set; }
+        public List<List<byte[]>>? AnnounceList { get; init; }
 
 
         /// <summary>
         /// Extra fields (such as private, encoding, etc) that are not explicitly modeled
         /// </summary>
-        internal Dictionary<byte[], object>? ExtraFields { get; set; }
+        public Dictionary<byte[], object>? ExtraFields { get; init; }
 
 
 
         /// <summary>
         /// Publisher that distributed the torrent
         /// </summary>
-        internal byte[]? Publisher { get; set; }
+        public byte[]? Publisher { get; init; }
 
 
         /// <summary>
         /// Publisher url
         /// </summary>
-        internal byte[]? PublisherUrl { get; set; }
+        public byte[]? PublisherUrl { get; init; }
 
 
         /// <summary>
         /// Encoding type
         /// </summary>
-        internal byte[]? EncodingType { get; set; }
+        public byte[]? EncodingType { get; init; }
 
 
         #endregion
@@ -192,7 +199,7 @@ namespace hTorrent
         /// This contains all payload-defining fields such as piece hashes,
         /// file name(s), and piece length.
         /// </summary>
-        internal Info? Info { get; set; }
+        public Info? Info { get; init; }
 
         #endregion
 
@@ -201,33 +208,33 @@ namespace hTorrent
         /// <summary>
         /// Optional free-form comment.
         /// </summary>
-        internal byte[]? Comment { get; set; }
+        public byte[]? Comment { get; init; }
 
         /// <summary>
         /// Torrent version
         ///</summary>
-        internal Version Ver { get; set; }
+        public Version Ver { get; init; }
 
 
         /// <summary>
         /// Identifier of the tool or client that created the torrent.
         /// </summary>
-        internal byte[]? CreatedBy { get; set; }
+        public byte[]? CreatedBy { get; init; }
 
         /// <summary>
         /// Creation timestamp stored as a UNIX epoch value (seconds).
         /// </summary>
-        internal long? CreationDate { get; set; }
+        public long? CreationDate { get; init; }
 
         /// <summary>
         /// Optional list of source URLs (non-standard extension).
         /// </summary>
-        internal List<byte[]>? Sources { get; set; }
+        public List<byte[]>? Sources { get; init; }
 
         /// <summary>
         /// Optional web seed URLs (url-list).
         /// </summary>
-        internal List<byte[]>? UrlList { get; set; }
+        public List<byte[]>? UrlList { get; init; }
 
         #endregion
 
@@ -238,7 +245,7 @@ namespace hTorrent
         ///
         /// Returns null if the creation date is not present.
         /// </summary>
-        internal DateTimeOffset? CreationDateTimeOffset =>
+        public DateTimeOffset? CreationDateTimeOffset =>
             CreationDate != null
                 ? DateTimeOffset.FromUnixTimeSeconds(CreationDate.Value)
                 : null;
@@ -246,7 +253,7 @@ namespace hTorrent
         /// <summary>
         /// Decoded UTF-8 announce URL.
         /// </summary>
-        internal string AnnounceString =>
+        public string AnnounceString =>
             Announce != null ? Encoding.UTF8.GetString(Announce) : string.Empty;
 
 
@@ -256,40 +263,40 @@ namespace hTorrent
         /// <summary>
         /// Decoded UTF-8 comment.
         /// </summary>
-        internal string CommentString =>
+        public string CommentString =>
             Comment != null ? Encoding.UTF8.GetString(Comment) : string.Empty;
 
 
         /// <summary>
         /// Decoded UTF-8 publisher.
         /// </summary>
-        internal string PublisherString =>
+        public string PublisherString =>
             Publisher != null ? Encoding.UTF8.GetString(Publisher) : string.Empty;
 
         /// <summary>
         /// Decoded UTF-8 publisher url.
         /// </summary>
-        internal string PublisherUrlString =>
+        public string PublisherUrlString =>
             PublisherUrl != null ? Encoding.UTF8.GetString(PublisherUrl) : string.Empty;
 
 
         /// <summary>
         /// Decoded UTF-8 encoding type.
         /// </summary>
-        internal string EncodingTypeString =>
+        public string EncodingTypeString =>
             EncodingType != null ? Encoding.UTF8.GetString(EncodingType) : string.Empty;
 
 
         /// <summary>
         /// Decoded UTF-8 creator identifier.
         /// </summary>
-        internal string CreatedByString =>
+        public string CreatedByString =>
             CreatedBy != null ? Encoding.UTF8.GetString(CreatedBy) : string.Empty;
 
         /// <summary>
         /// Decoded announce-list URLs grouped by tier.
         /// </summary>
-        internal IEnumerable<IEnumerable<string>>? AnnounceListStrings =>
+        public IEnumerable<IEnumerable<string>>? AnnounceListStrings =>
             AnnounceList?.Select(tier => tier.Select(url => Encoding.UTF8.GetString(url)));
 
         #endregion
@@ -374,11 +381,11 @@ namespace hTorrent
         ///
         /// This method assumes the input dictionary originates from the
         /// Parser and follows BitTorrent metainfo conventions.
-        ///
-        /// The "_raw_info" entry is expected to be present and is injected
-        /// into the Info to preserve the exact info dictionary bytes.
+        /// 
+        /// Additionally, rawInfo is assumed to be passed to Map before 
+        /// being passed to MapToTorrent, and thus should not be null.
         /// </summary>
-        internal void MapToTorrent(Dictionary<byte[], object> root, RawInfoBytesHolder rawInfo)
+        internal Torrent MapToTorrent(Dictionary<byte[], object> root, RawInfoBytesHolder rawInfo)
         {
             var infoDict = (Dictionary<byte[], object>)root[BencodeKeys.Info];
 
@@ -403,80 +410,83 @@ namespace hTorrent
 
 
 
-            //Maps all values to their respective properties
+            return new Torrent() {
 
-            Announce = root.TryGetValue(BencodeKeys.Announce, out var a) ? (byte[])a : null;
+                //Maps all values to their respective properties
 
-            EncodingType = root.TryGetValue(BencodeKeys.EncodingType, out var e) ? (byte[])e : null;
+                Announce = root.TryGetValue(BencodeKeys.Announce, out var a) ? (byte[])a : null,
 
-            Publisher = root.TryGetValue(BencodeKeys.Publisher, out var p) ? (byte[])p : null;
+                EncodingType = root.TryGetValue(BencodeKeys.EncodingType, out var e) ? (byte[])e : null,
 
-
-            PublisherUrl = root.TryGetValue(BencodeKeys.PublisherUrl, out var pu) ? (byte[])pu : null;
-
-
-            Comment = root.TryGetValue(BencodeKeys.Comment, out var c)
-                ? (byte[])c
-                : null;
-
-            CreatedBy = root.TryGetValue(BencodeKeys.CreatedBy, out var cb)
-                ? (byte[])cb
-                : null;
-
-            CreationDate = root.TryGetValue(BencodeKeys.CreationDate, out var cd)
-                ? (long?)cd
-                : null;
-
-            UrlList = root.TryGetValue(BencodeKeys.UrlList, out var ul)
-                ? ((List<object>)ul).Cast<byte[]>().ToList()
-                : null;
-
-            Sources = root.TryGetValue(BencodeKeys.Sources, out var s)
-                ? ((List<object>)s).Cast<byte[]>().ToList()
-                : null;
-
-            AnnounceList = root.TryGetValue(BencodeKeys.AnnounceList, out var al)
-                ? ((List<object>)al)
-                    .Select(tier => ((List<object>)tier).Cast<byte[]>().ToList())
-                    .ToList()
-                : null;
-
-            ExtraFields = root.Where(x => !KnownRootKeys.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value, ByteComparer.Instance);
+                Publisher = root.TryGetValue(BencodeKeys.Publisher, out var p) ? (byte[])p : null,
 
 
-            Ver = tmp;
+                PublisherUrl = root.TryGetValue(BencodeKeys.PublisherUrl, out var pu) ? (byte[])pu : null,
 
 
+                Comment = root.TryGetValue(BencodeKeys.Comment, out var c)
+                    ? (byte[])c
+                    : null,
 
-            //new info class, just as with the top-level data, all fields with unknow keys are in extra fields
-            Info = new Info
-            {
+                CreatedBy = root.TryGetValue(BencodeKeys.CreatedBy, out var cb)
+                    ? (byte[])cb
+                    : null,
+
+                CreationDate = root.TryGetValue(BencodeKeys.CreationDate, out var cd)
+                    ? (long?)cd
+                    : null,
+
+                UrlList = root.TryGetValue(BencodeKeys.UrlList, out var ul)
+                    ? ((List<object>)ul).Cast<byte[]>().ToList()
+                    : null,
+
+                Sources = root.TryGetValue(BencodeKeys.Sources, out var s)
+                    ? ((List<object>)s).Cast<byte[]>().ToList()
+                    : null,
+
+                AnnounceList = root.TryGetValue(BencodeKeys.AnnounceList, out var al)
+                    ? ((List<object>)al)
+                        .Select(tier => ((List<object>)tier).Cast<byte[]>().ToList())
+                        .ToList()
+                    : null,
+
+                ExtraFields = root.Where(x => !KnownRootKeys.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value, ByteComparer.Instance),
 
 
-                Private = infoDict.TryGetValue(Info.BencodeKeys.Private, out var priv) ? (long)priv : null,
-                Source = infoDict.TryGetValue(Info.BencodeKeys.Source, out var sor) ? (byte[])sor : null,
-                Length = isSingleFile ? (long)infoDict[Info.BencodeKeys.Length] : null,
-                Files = !isSingleFile ? ParseFiles((List<object>)infoDict[Info.BencodeKeys.Files]) : null,
-                Name = infoDict.TryGetValue(Info.BencodeKeys.Name, out var name) ? (byte[])name : throw new InvalidDataException("Invalid name"),
-                PieceLength = (long)infoDict[Info.BencodeKeys.PieceLength],
-                Pieces = (tmp == Version.V1 || tmp == Version.HYBRID) ? (byte[])infoDict[Info.BencodeKeys.Pieces] : null,
-                Md5Sum = infoDict.TryGetValue(Info.BencodeKeys.Md5Sum, out var md5) ? (byte[])md5 : null,
-                Sha1 = infoDict.TryGetValue(Info.BencodeKeys.Sha1, out var sha1) ? (byte[])sha1 : null,
-                Sha256 = infoDict.TryGetValue(Info.BencodeKeys.Sha256, out var sha256) ? (byte[])sha256 : null,
+                Ver = tmp,
 
 
 
+                //new info class, just as with the top-level data, all fields with unknow keys are in extra fields
+                Info = new Info
+                {
 
-                ExtraFields = infoDict
-            .Where(x => !KnownInfoKeys.Contains(x.Key))
-            .ToDictionary(x => x.Key, x => x.Value, ByteComparer.Instance),
 
-                // Raw info bytes captured during parsing
-                RawBencodedInfo = rawInfo.rawBytes ?? throw new InvalidDataException("Failure to capture raw info bytes")
+                    Private = infoDict.TryGetValue(Info.BencodeKeys.Private, out var priv) ? (long)priv : null,
+                    Source = infoDict.TryGetValue(Info.BencodeKeys.Source, out var sor) ? (byte[])sor : null,
+                    Length = isSingleFile ? (long)infoDict[Info.BencodeKeys.Length] : null,
+                    Files = !isSingleFile ? ParseFiles((List<object>)infoDict[Info.BencodeKeys.Files]) : null,
+                    Name = infoDict.TryGetValue(Info.BencodeKeys.Name, out var name) ? (byte[])name : throw new InvalidDataException("Invalid name"),
+                    PieceLength = (long)infoDict[Info.BencodeKeys.PieceLength],
+                    Pieces = (tmp == Version.V1 || tmp == Version.HYBRID) ? (byte[])infoDict[Info.BencodeKeys.Pieces] : null,
+                    Md5Sum = infoDict.TryGetValue(Info.BencodeKeys.Md5Sum, out var md5) ? (byte[])md5 : null,
+                    Sha1 = infoDict.TryGetValue(Info.BencodeKeys.Sha1, out var sha1) ? (byte[])sha1 : null,
+                    Sha256 = infoDict.TryGetValue(Info.BencodeKeys.Sha256, out var sha256) ? (byte[])sha256 : null,
 
 
 
 
+                    ExtraFields = infoDict
+                .Where(x => !KnownInfoKeys.Contains(x.Key))
+                .ToDictionary(x => x.Key, x => x.Value, ByteComparer.Instance),
+
+                    // Raw info bytes captured during parsing
+                    RawBencodedInfo = rawInfo.rawBytes ?? throw new InvalidDataException("Failure to capture raw info bytes")
+
+
+
+
+                }
             };
         }
 
@@ -485,17 +495,17 @@ namespace hTorrent
 
         #region VALIDATION
 
-        internal void Validate()
+        internal static void Validate(Torrent torrent)
         {
             //Piece length
-            if (Info!.PieceLength <= 0)
+            if (torrent.Info!.PieceLength <= 0)
                 throw new InvalidDataException("Invalid piece length");
 
 
             //Total pieces length
-            if ((Ver == Version.V1 || Ver == Version.HYBRID))
+            if ((torrent.Ver == Version.V1 || torrent.Ver == Version.HYBRID))
             {
-                if (Info!.Pieces == null || Info.Pieces.Length % 20 != 0 || Info.Pieces.Length <= 0)
+                if (torrent.Info!.Pieces == null || torrent.Info.Pieces.Length % 20 != 0 || torrent.Info.Pieces.Length <= 0)
                     throw new InvalidDataException("Invalid pieces field length");
 
 
@@ -503,7 +513,7 @@ namespace hTorrent
 
 
             //Single file torrent must not contain files, or a multi-file dictionary must not have a length
-            if ((Info!.Length != null && Info.Files != null) || (Info!.Length == null && Info.Files == null))
+            if ((torrent.Info!.Length != null && torrent.Info.Files != null) || (torrent.Info!.Length == null && torrent.Info.Files == null))
                 throw new InvalidDataException("Info dictionary must contain exactly one of \"length\" or \"files\"");
 
 
@@ -511,9 +521,9 @@ namespace hTorrent
 
 
             //Empty files
-            if (Info.Files != null)
+            if (torrent.Info.Files != null)
             {
-                foreach (var file in Info.Files)
+                foreach (var file in torrent.Info.Files)
                 {
                     if (file.Path.Count == 0 || file.Path.Any(p => p.Length == 0))
                         throw new InvalidDataException("Invalid empty path element");
@@ -523,7 +533,7 @@ namespace hTorrent
 
 
             //Torrent size
-            long totalLength = (Info.Files == null) ? (long)Info.Length! : Info.Files.Sum(f => f.Length);
+            long totalLength = (torrent.Info.Files == null) ? (long)torrent.Info.Length! : torrent.Info.Files.Sum(f => f.Length);
             if (totalLength <= 0)
                 throw new InvalidDataException("Invalid size");
 

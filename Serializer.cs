@@ -29,6 +29,10 @@ namespace hTorrent
         /// </summary>
         public static void SaveTorrentAsFile(Torrent torrent, string filename)
         {
+
+            //validate before serializing to help prevent invalid data (size of 0, invalid piece length, etc)
+            Torrent.Validate(torrent);
+
             var model = torrent.ToBencodeModel();
 
             using var ms = new MemoryStream();

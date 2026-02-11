@@ -2,17 +2,34 @@
 
 hTorrent provides classes and methods for:
 
-- deserializing tracker responses
-- deserializing torrent files
-- serializing torrent files
-
-
+- Deserializing tracker responses
+- Deserializing torrent files
+- Serializing torrent files
 
 
 ## Classes
 
+### Info
+
+### File
+
+### Torrent
+
+### Parser
+
+### Serializer 
+
 
 ## Methods 
 
+### Torrent.TorrentBuilder
+
+### Parser.DecodeBencodeObject
+
+### Serializer.SaveTorrentAsFile
+
 
 ## What is not currently supported
+
+- V2 support
+- Magnet link parsing/generation 

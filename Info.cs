@@ -36,7 +36,7 @@ namespace hTorrent
     /// Once constructed, this should be treated as immutable to ensure
     /// that any derived hashes (info-hash, piece hashes) remain valid.
     /// </summary>
-    internal sealed class Info
+    public sealed class Info
     {
 
 
@@ -315,10 +315,10 @@ namespace hTorrent
     /// <summary>
     /// Strongly-typed representation of a file used in the Info
     /// </summary>
-    internal sealed class File
+    public sealed class File
     {
-        internal long Length { get; init; }
-        internal List<byte[]> Path { get; init; } = new();
+        public long Length { get; init; }
+        public List<byte[]> Path { get; init; } = [];
     }
 
 
@@ -327,7 +327,7 @@ namespace hTorrent
     /// </summary> 
     internal sealed class RawInfoBytesHolder
     {
-        internal byte[]? rawBytes { get; set; }
+        internal byte[]? RawBytes { get; set; }
     }
 
 }

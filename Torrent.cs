@@ -45,10 +45,10 @@ namespace hTorrent
 
         public Torrent() { }
 
-        public Torrent TorrentBuilder(string filename)
+        public static Torrent TorrentBuilder(string filename)
         {
             //parse
-            RawInfoBytesHolder rawBytes = new RawInfoBytesHolder();
+            RawInfoBytesHolder rawBytes = new();
             Parser.BNode node = Parser.Parse(System.IO.File.ReadAllBytes(filename));
             var root = (Dictionary<byte[], object>)Map(node, rawBytes);
 
@@ -104,7 +104,7 @@ namespace hTorrent
 
 
         internal static readonly HashSet<byte[]> KnownRootKeys =
-            new HashSet<byte[]>(ByteComparer.Instance)
+            new(ByteComparer.Instance)
             {
                 BencodeKeys.Announce,
                 BencodeKeys.AnnounceList,
@@ -122,7 +122,7 @@ namespace hTorrent
 
         //NOTE: v2 specific keys are intentionally left in ExtraFields, will be added when v2 support is implemented
         internal static readonly HashSet<byte[]> KnownInfoKeys =
-            new HashSet<byte[]>(ByteComparer.Instance)
+            new(ByteComparer.Instance)
             {
                 Info.BencodeKeys.Length,
                 Info.BencodeKeys.Name,
@@ -385,7 +385,7 @@ namespace hTorrent
         /// Additionally, rawInfo is assumed to be passed to Map before 
         /// being passed to MapToTorrent, and thus should not be null.
         /// </summary>
-        internal Torrent MapToTorrent(Dictionary<byte[], object> root, RawInfoBytesHolder rawInfo)
+        internal static Torrent MapToTorrent(Dictionary<byte[], object> root, RawInfoBytesHolder rawInfo)
         {
             var infoDict = (Dictionary<byte[], object>)root[BencodeKeys.Info];
 
@@ -437,17 +437,15 @@ namespace hTorrent
                     : null,
 
                 UrlList = root.TryGetValue(BencodeKeys.UrlList, out var ul)
-                    ? ((List<object>)ul).Cast<byte[]>().ToList()
+                    ? [.. ((List<object>)ul).Cast<byte[]>()]
                     : null,
 
                 Sources = root.TryGetValue(BencodeKeys.Sources, out var s)
-                    ? ((List<object>)s).Cast<byte[]>().ToList()
+                    ? [.. ((List<object>)s).Cast<byte[]>()]
                     : null,
 
                 AnnounceList = root.TryGetValue(BencodeKeys.AnnounceList, out var al)
-                    ? ((List<object>)al)
-                        .Select(tier => ((List<object>)tier).Cast<byte[]>().ToList())
-                        .ToList()
+                    ? [.. ((List<object>)al).Select(tier => ((List<object>)tier).Cast<byte[]>().ToList())]
                     : null,
 
                 ExtraFields = root.Where(x => !KnownRootKeys.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value, ByteComparer.Instance),
@@ -481,7 +479,7 @@ namespace hTorrent
                 .ToDictionary(x => x.Key, x => x.Value, ByteComparer.Instance),
 
                     // Raw info bytes captured during parsing
-                    RawBencodedInfo = rawInfo.rawBytes ?? throw new InvalidDataException("Failure to capture raw info bytes")
+                    RawBencodedInfo = rawInfo.RawBytes ?? throw new InvalidDataException("Failure to capture raw info bytes")
 
 
 
@@ -648,8 +646,8 @@ namespace hTorrent
                 if (rawInfo == null)
                     throw new InvalidDataException("rawInfo was null while Map was called with isInfo set to true");
 
-                if (rawInfo.rawBytes == null && dict.RawBytes != null)
-                    rawInfo.rawBytes = dict.RawBytes.Value.ToArray();
+                if (rawInfo.RawBytes == null && dict.RawBytes != null)
+                    rawInfo.RawBytes = dict.RawBytes.Value.ToArray();
 
             }
 
@@ -680,9 +678,7 @@ namespace hTorrent
 
                     // Path components are preserved as raw bytes
                     // to avoid premature decoding or normalization
-                    Path = ((List<object>)dict[Info.BencodeKeys.Path])
-                        .Cast<byte[]>()
-                        .ToList(),
+                    Path = [.. ((List<object>)dict[Info.BencodeKeys.Path]).Cast<byte[]>()],
                 };
 
                 result.Add(file);

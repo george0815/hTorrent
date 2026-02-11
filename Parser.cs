@@ -153,7 +153,7 @@ namespace hTorrent
         /// </summary>
         internal ReadOnlyMemory<byte> Slice(int start, int end)
         {
-            return Buffer.Slice(start, end - start);
+            return Buffer[start..end];
         }
 
         #endregion

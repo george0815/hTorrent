@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using lain.protocol.dto;
 
 namespace hTorrent
 {
@@ -17,7 +16,7 @@ namespace hTorrent
     /// Any deviation in ordering or encoding will result in an invalid
     /// torrent or broken info-hash.
     /// </summary>
-    internal class Serializer
+    public class Serializer
     {
         /// <summary>
         /// Serialization entry point.
@@ -28,7 +27,7 @@ namespace hTorrent
         /// The Torrent is first converted into a bencode-compatible
         /// object model, then streamed to ensure deterministic output.
         /// </summary>
-        internal static void SaveTorrentAsFile(Torrent torrent, string filename)
+        public static void SaveTorrentAsFile(Torrent torrent, string filename)
         {
             var model = torrent.ToBencodeModel();
 
@@ -51,7 +50,7 @@ namespace hTorrent
         /// - Dictionary&lt;byte[], object&gt;
         /// - SortedDictionary&lt;byte[], object&gt;
         /// </summary>
-        internal static void WriteValues(MemoryStream stream, object model)
+        private static void WriteValues(MemoryStream stream, object model)
         {
             switch (model)
             {

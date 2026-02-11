@@ -1,6 +1,7 @@
 ﻿// =====================================================================================
+// Created by George Hunter S. in Feburary of 2026
 // Torrent.cs
-//
+// 
 // Data Transfer Object representing the root of a BitTorrent metainfo file (.torrent).
 //
 // This models the top-level bencoded dictionary defined by the BitTorrent
@@ -35,13 +36,13 @@ namespace hTorrent
     /// and encapsulates tracker configuration, metadata, and the embedded
     /// Info which defines the actual payload structure.
     /// </summary>
-    internal sealed class Torrent
+    public sealed class Torrent
     {
         /// <summary>
-        /// Constructor - takes in a filename and executes full parsing process
+        /// Constructor - takes in a filename and executes full parsing process, will add a magnet link constructor in the future
         /// </summary>
 
-        internal Torrent(string filename)
+        public Torrent(string filename)
         {
             RawInfoBytesHolder rawBytes = new RawInfoBytesHolder();
             Parser.BNode node = Parser.Parse(System.IO.File.ReadAllBytes(filename));
@@ -70,17 +71,17 @@ namespace hTorrent
         ///</summary>
         internal static class BencodeKeys
         {
-            public static readonly byte[] Announce = Encoding.ASCII.GetBytes("announce");
-            public static readonly byte[] AnnounceList = Encoding.ASCII.GetBytes("announce-list");
-            public static readonly byte[] Comment = Encoding.ASCII.GetBytes("comment");
-            public static readonly byte[] CreatedBy = Encoding.ASCII.GetBytes("created by");
-            public static readonly byte[] CreationDate = Encoding.ASCII.GetBytes("creation date");
-            public static readonly byte[] UrlList = Encoding.ASCII.GetBytes("url-list");
-            public static readonly byte[] Sources = Encoding.ASCII.GetBytes("sources");
-            public static readonly byte[] Info = Encoding.ASCII.GetBytes("info");
-            public static readonly byte[] Publisher = Encoding.ASCII.GetBytes("publisher");
-            public static readonly byte[] PublisherUrl = Encoding.ASCII.GetBytes("publisher-url");
-            public static readonly byte[] EncodingType = Encoding.ASCII.GetBytes("encoding");
+            internal static readonly byte[] Announce = Encoding.ASCII.GetBytes("announce");
+            internal static readonly byte[] AnnounceList = Encoding.ASCII.GetBytes("announce-list");
+            internal static readonly byte[] Comment = Encoding.ASCII.GetBytes("comment");
+            internal static readonly byte[] CreatedBy = Encoding.ASCII.GetBytes("created by");
+            internal static readonly byte[] CreationDate = Encoding.ASCII.GetBytes("creation date");
+            internal static readonly byte[] UrlList = Encoding.ASCII.GetBytes("url-list");
+            internal static readonly byte[] Sources = Encoding.ASCII.GetBytes("sources");
+            internal static readonly byte[] Info = Encoding.ASCII.GetBytes("info");
+            internal static readonly byte[] Publisher = Encoding.ASCII.GetBytes("publisher");
+            internal static readonly byte[] PublisherUrl = Encoding.ASCII.GetBytes("publisher-url");
+            internal static readonly byte[] EncodingType = Encoding.ASCII.GetBytes("encoding");
         }
 
 
@@ -567,7 +568,7 @@ namespace hTorrent
         /// that the raw bencoded bytes of the "info" dictionary can be captured
         /// exactly once during traversal.
         /// </summary>
-        internal static object Map(Parser.BNode node, RawInfoBytesHolder rawInfo, bool isInfo = false)
+        internal static object Map(Parser.BNode node, RawInfoBytesHolder? rawInfo = null, bool isInfo = false)
         {
             return node switch
             {
@@ -587,7 +588,7 @@ namespace hTorrent
 
                 // Bencode dictionary → Dictionary<byte[], object>
                 Parser.BDict d =>
-                    MapDict(d, rawInfo, isInfo),
+                    MapDict(d, rawInfo!, isInfo),
 
                 // Any unknown node type indicates a malformed AST
                 _ =>
@@ -607,7 +608,7 @@ namespace hTorrent
         /// </summary>
         private static Dictionary<byte[], object> MapDict(
             Parser.BDict dict,
-            RawInfoBytesHolder rawInfo,
+            RawInfoBytesHolder? rawInfo = null,
             bool isInfo = false)
         {
             // Use ByteComparer to ensure correct byte-wise key semantics
@@ -632,8 +633,15 @@ namespace hTorrent
             // - Preserve original ordering and formatting
             //
             // Any re-encoding would invalidate the info-hash.
-            if (isInfo && rawInfo.rawBytes == null && dict.RawBytes != null)
-                rawInfo.rawBytes = dict.RawBytes.Value.ToArray();
+            if (isInfo)
+            {
+                if (rawInfo == null)
+                    throw new InvalidDataException("rawInfo was null while Map was called with isInfo set to true");
+
+                if (rawInfo.rawBytes == null && dict.RawBytes != null)
+                    rawInfo.rawBytes = dict.RawBytes.Value.ToArray();
+
+            }
 
             return result;
         }

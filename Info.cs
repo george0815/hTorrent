@@ -22,10 +22,8 @@
 //
 // =====================================================================================
 
-using System;
-using System.Collections.Generic;
+
 using System.Text;
-using System.Linq;
 
 namespace hTorrent
 {
@@ -53,18 +51,18 @@ namespace hTorrent
         ///</summary>
         internal static class BencodeKeys
         {
-            public static readonly byte[] Files = Encoding.ASCII.GetBytes("files");
-            public static readonly byte[] Path = Encoding.ASCII.GetBytes("path");
-            public static readonly byte[] Length = Encoding.ASCII.GetBytes("length");
-            public static readonly byte[] Name = Encoding.ASCII.GetBytes("name");
-            public static readonly byte[] PieceLength = Encoding.ASCII.GetBytes("piece length");
-            public static readonly byte[] Pieces = Encoding.ASCII.GetBytes("pieces");
-            public static readonly byte[] Md5Sum = Encoding.ASCII.GetBytes("md5sum");
-            public static readonly byte[] Sha1 = Encoding.ASCII.GetBytes("sha1");
-            public static readonly byte[] Sha256 = Encoding.ASCII.GetBytes("sha256");
-            public static readonly byte[] MetaInfo = Encoding.ASCII.GetBytes("meta version");
-            public static readonly byte[] Private = Encoding.ASCII.GetBytes("private");
-            public static readonly byte[] Source = Encoding.ASCII.GetBytes("source");
+            internal static readonly byte[] Files = Encoding.ASCII.GetBytes("files");
+            internal static readonly byte[] Path = Encoding.ASCII.GetBytes("path");
+            internal static readonly byte[] Length = Encoding.ASCII.GetBytes("length");
+            internal static readonly byte[] Name = Encoding.ASCII.GetBytes("name");
+            internal static readonly byte[] PieceLength = Encoding.ASCII.GetBytes("piece length");
+            internal static readonly byte[] Pieces = Encoding.ASCII.GetBytes("pieces");
+            internal static readonly byte[] Md5Sum = Encoding.ASCII.GetBytes("md5sum");
+            internal static readonly byte[] Sha1 = Encoding.ASCII.GetBytes("sha1");
+            internal static readonly byte[] Sha256 = Encoding.ASCII.GetBytes("sha256");
+            internal static readonly byte[] MetaInfo = Encoding.ASCII.GetBytes("meta version");
+            internal static readonly byte[] Private = Encoding.ASCII.GetBytes("private");
+            internal static readonly byte[] Source = Encoding.ASCII.GetBytes("source");
             
 
         }

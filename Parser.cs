@@ -35,9 +35,8 @@
 //
 // =====================================================================================
 
-using System;
-using lain.protocol.dto;
-using System.Collections.Generic;
+
+using System.Data;
 using System.Text;
 
 namespace hTorrent
@@ -217,11 +216,26 @@ namespace hTorrent
         const byte IntEnd = (byte)'e';
         const byte StringSeparator = (byte)':';
 
-  
-  
+
+
         #endregion
 
         #region ENTRY POINTS
+
+
+
+        /// <summary>
+        /// Deserializes an Bencode string into a CLR object. This will probably be used to decode tracker repsonses. 
+        /// </summary>
+        public static Dictionary<byte[], object> DecodeBencodeObject(byte[] data)
+        {
+            BNode node = Parser.Parse(data);
+            return (Dictionary<byte[], object>)Torrent.Map(node);
+
+        } 
+
+
+
 
         /// <summary>
         /// Parses a complete bencoded byte array into a native object tree.
@@ -234,7 +248,7 @@ namespace hTorrent
             var reader = new ByteReader(bytes);
             var node = ParseNext(reader, captureRaw: false);
             if (reader.Position != reader.Buffer.Length)
-                throw new InvalidDataException("Trailing data after root object.");
+                throw new InvalidDataException("Trailing data after root object");
             return node;
         }
 

@@ -181,7 +181,7 @@ namespace hTorrent
     /// - compute hashes
     /// - detect torrent versions
     /// </summary>
-    internal class Parser
+    public class Parser
     {
         #region RECORD TYPES
         // These records form a minimal, immutable AST for bencoded data.
@@ -229,7 +229,7 @@ namespace hTorrent
         /// </summary>
         public static Dictionary<byte[], object> DecodeBencodeObject(byte[] data)
         {
-            BNode node = Parser.Parse(data);
+            BNode node = Parse(data);
             return (Dictionary<byte[], object>)Torrent.Map(node);
 
         } 

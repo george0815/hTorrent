@@ -1,4 +1,4 @@
-# hTorrent - Torrent parser and Bencode serializer/deserializer 
+# hTorrent - Torrent parser and Bencode serializer/deserializer library
 
 hTorrent provides classes and methods for:
 

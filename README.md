@@ -95,4 +95,7 @@ Very straightforward, takes in a Torrent instance and a file path as parameters 
 ## What is not currently supported
 
 - V2 support
-- Magnet link parsing/generation 
+- Magnet link parsing/generation
+
+## Installation 
+```dotnet add package hTorrent --version 1.0.0```
